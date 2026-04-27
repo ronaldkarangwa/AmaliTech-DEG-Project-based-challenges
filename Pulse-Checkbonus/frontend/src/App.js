@@ -1,78 +1,129 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API = "http://127.0.0.1:5000";
-
 function App() {
   const [monitors, setMonitors] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [now, setNow] = useState(Date.now());
 
-  const fetchMonitors = async () => {
-    const res = await fetch(`${API}/monitors`);
-    const data = await res.json();
-    setMonitors(data);
-  };
-
-  const createMonitor = async () => {
-    await fetch(`${API}/monitors`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: "device-" + Date.now(),
-        timeout: 15,
-        alert_email: "test@critmon.com"
-      })
-    });
-    fetchMonitors();
-  };
-
-  const heartbeat = async (id) => {
-    await fetch(`${API}/monitors/${id}/heartbeat`, { method: "POST" });
-    fetchMonitors();
-  };
-
-  const pause = async (id) => {
-    await fetch(`${API}/monitors/${id}/pause`, { method: "POST" });
-    fetchMonitors();
-  };
-
+  // Real-time clock (for countdown)
   useEffect(() => {
-    fetchMonitors();
-    const interval = setInterval(fetchMonitors, 1000); // every second
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fetch monitors
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("http://localhost:5000/monitors")
+        .then(res => res.json())
+        .then(data => setMonitors(data))
+        .catch(err => console.error("Monitors fetch error:", err));
+    }, 2000);
+
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch alerts
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("http://localhost:5000/alerts")
+        .then(res => res.json())
+        .then(data => setAlerts(data))
+        .catch(err => console.error("Alerts fetch error:", err));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto clear alerts
+  useEffect(() => {
+    if (alerts.length > 0) {
+      const timer = setTimeout(() => {
+        setAlerts([]);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alerts]);
+
+  // Create monitor
+  const createMonitor = () => {
+    fetch("http://localhost:5000/monitors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: "device-" + Math.floor(Math.random() * 1000),
+        timeout: 15,
+        alert_email: "test@email.com"
+      })
+    });
+  };
+
+  // Heartbeat
+  const sendHeartbeat = (id) => {
+    fetch(`http://localhost:5000/monitors/${id}/heartbeat`, {
+      method: "POST"
+    });
+  };
+
   return (
-    <div className="container">
-      <h1>Pulse-Check Dashboard</h1>
+    <div className="App">
+      <h1>Pulse Check Dashboard</h1>
 
-      <button className="add-btn" onClick={createMonitor}>
-        + Add Device
-      </button>
+      <button onClick={createMonitor}>Add Test Device</button>
 
-      <div className="grid">
-        {monitors.map((m) => (
-          <div key={m.id} className={`card ${m.status}`}>
-            <h2>{m.id}</h2>
-
-            <p>Status: {m.status}</p>
-
-            <p>Timeout: {m.timeout}s</p>
-
-            <p className="timer">
-              ⏳ {m.status === "active" ? m.remaining : "-"}s
-            </p>
-
-            <div className="actions">
-              <button onClick={() => heartbeat(m.id)}>
-                Heartbeat
-              </button>
-
-              <button onClick={() => pause(m.id)}>
-                Pause
-              </button>
-            </div>
+      {/* ALERTS */}
+      <div className="alert-container">
+        {alerts.map((a, i) => (
+          <div key={i} className="alert-popup">
+            🚨 {a.message}
           </div>
         ))}
+      </div>
+
+      {/* DEVICE CARDS */}
+      <div className="card-container">
+        {monitors.map((m) => {
+          const remaining = Math.max(
+            0,
+            Math.floor((m.expiry * 1000 - now) / 1000)
+          );
+
+          const isCritical = remaining <= 3;
+          const isDown = m.status === "down";
+
+          return (
+            <div
+              key={m.id}
+              className={`card ${m.status} ${isCritical ? "blink" : ""}`}
+            >
+              <h3>{m.id}</h3>
+
+              <p>Status: <strong>{m.status}</strong></p>
+
+              <p>
+                Countdown:{" "}
+                <strong style={{ color: isCritical ? "yellow" : "white" }}>
+                  {remaining}s
+                </strong>
+              </p>
+
+              <button onClick={() => sendHeartbeat(m.id)}>
+                Send Heartbeat
+              </button>
+
+              {isDown && (
+                <p style={{ color: "red", fontWeight: "bold" }}>
+                  Device is DOWN
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
