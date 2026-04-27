@@ -1,6 +1,12 @@
 import json
+import requests
 from datetime import datetime
 from redis_client import get_redis
+
+requests.post("http://localhost:5000/alerts", json={
+    "id": monitor_id,
+    "message": f"Device {monitor_id} is down"
+})
 
 r = get_redis()
 

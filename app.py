@@ -6,8 +6,9 @@ from redis_client import get_redis
 app = Flask(__name__)
 CORS(app)  
 
-r = get_redis()
-
+r = get_redis() 
+alerts = []
+expiry = int(time()) + timeout
 
 @app.route('/monitors', methods=['POST'])
 def create_monitor():
@@ -81,6 +82,17 @@ def get_monitors():
         })
 
     return jsonify(monitors)
+
+@app.route("/alerts", methods=["POST"])
+def receive_alert():
+    data = request.json
+    alerts.append(data)
+    return {"status": "received"}, 200
+
+
+@app.route("/alerts", methods=["GET"])
+def get_alerts():
+    return jsonify(alerts)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
