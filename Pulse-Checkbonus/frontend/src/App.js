@@ -18,7 +18,7 @@ function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: "device-" + Date.now(),
-        timeout: 10,
+        timeout: 15,
         alert_email: "test@critmon.com"
       })
     });
@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     fetchMonitors();
-    const interval = setInterval(fetchMonitors, 2000);
+    const interval = setInterval(fetchMonitors, 1000); // every second
     return () => clearInterval(interval);
   }, []);
 
@@ -54,11 +54,13 @@ function App() {
           <div key={m.id} className={`card ${m.status}`}>
             <h2>{m.id}</h2>
 
-            <p>
-              Status: <span className="status">{m.status}</span>
-            </p>
+            <p>Status: {m.status}</p>
 
             <p>Timeout: {m.timeout}s</p>
+
+            <p className="timer">
+              ⏳ {m.status === "active" ? m.remaining : "-"}s
+            </p>
 
             <div className="actions">
               <button onClick={() => heartbeat(m.id)}>

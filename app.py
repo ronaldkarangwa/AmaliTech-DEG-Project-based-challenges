@@ -65,17 +65,22 @@ def pause(monitor_id):
 @app.route("/monitors", methods=["GET"])
 def get_monitors():
     keys = r.keys("monitor:*")
-    result = []
+    monitors = []
 
     for key in keys:
-        data = r.get(key)
-        if data:
-            obj = json.loads(data)
-            obj["id"] = key.split(":")[1]
-            result.append(obj)
+        monitor_id = key.split(":")[1]
+        meta = json.loads(r.get(key))
 
-    return jsonify(result)
+        ttl = r.ttl(f"timer:{monitor_id}")  # seconds remaining
 
+        monitors.append({
+            "id": monitor_id,
+            "status": meta["status"],
+            "timeout": meta["timeout"],
+            "remaining": ttl if ttl > 0 else 0
+        })
+
+    return jsonify(monitors)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
