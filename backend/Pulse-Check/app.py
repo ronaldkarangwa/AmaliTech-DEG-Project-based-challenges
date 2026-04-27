@@ -23,3 +23,21 @@ def create_monitor():
     r.setex(f"timer:{monitor_id}", timeout, "active")
 
     return jsonify({"message": "Monitor created successfully", "monitor_id": monitor_id}), 201
+
+@app.route('/monitors/<monitor_id>/heartbeat', methods=['POST'])
+def heartbeat(monitor_id):
+    metadata_raw = r.get(f'monitor:{monitor_id}')
+    if not metadata_raw:
+        return jsonify({"error": "Monitor not found"}), 404
+    metadata = json.loads(metadata_raw)
+
+    # Reset the Timer Key using original timeout
+    r.setex(f"timer:{monitor_id}", metadata["timeout"], "active")
+
+    # Update status incase it was 'down' or 'paused'
+    metadata["status"] = "active"
+    r.set(f'monitor:{monitor_id}', json.dumps(metadata))
+    return jsonify({"message": "Heartbeat received successfully"}), 200
+
+if __name__ == '__main__':
+    app.run(port=5000)
