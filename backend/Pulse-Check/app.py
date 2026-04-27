@@ -1,6 +1,6 @@
 import json
 from flask import Flask, request, jsonify
-import app.redis_client import get_redis
+from redis_client import get_redis
 
 app = Flask(__name__)
 r = get_redis()
@@ -15,11 +15,11 @@ def create_monitor():
 
     # Store Metadata in Redis
     r.set(
-        f'monitor:{monitor_id}",
+        f"monitor:{monitor_id}",
         json.dumps({
-        "alert_email": email,
-        "status": "active"
-        "timeout": timeout
+            "alert_email": email,
+            "status": "active",
+            "timeout": timeout
         })
     )
 
@@ -30,16 +30,16 @@ def create_monitor():
     
 
 @app.route('/monitors/<monitor_id>/heartbeat', methods=['POST'])
-def heartbeat(id):
-    metadata_raw = r.get(f'monitor:{id}')
+def heartbeat(monitor_id):
+    metadata_raw = r.get(f"monitor:{monitor_id}")
     if not metadata_raw:
         return jsonify({"error": "Monitor not found"}), 404
-    
+
     meta = json.loads(metadata_raw)
     meta["status"] = "active"
-    
-    r.set(f'monitor:{id}', json.dumps(meta))
-    r.setex(f"timer:{id}", meta["timeout"], "active")
+
+    r.set(f"monitor:{monitor_id}", json.dumps(meta))
+    r.setex(f"timer:{monitor_id}", meta["timeout"], "active")
 
     return jsonify({"message": "Heartbeat received"}), 200
 
