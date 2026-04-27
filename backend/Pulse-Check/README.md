@@ -29,8 +29,7 @@ sequenceDiagram
 Null → Active
 Starts timer
 If already exists:
-Either reset to Active (idempotent design)
-or reject (409 Conflict) → you must choose
+Reject (409 Conflict)
 2. POST /heartbeat
 Active → Active → reset timer
 Paused → Active → start timer
