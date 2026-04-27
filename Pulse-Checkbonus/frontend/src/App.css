@@ -1,53 +1,53 @@
 .container {
-  font-family: Arial, sans-serif;
   padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 h1 {
-  color: #222;
+  margin-bottom: 10px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.table th, .table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
-}
-
-button {
-  margin: 0 5px;
-  padding: 6px 10px;
+.add-btn {
+  margin-bottom: 20px;
+  padding: 8px 12px;
   cursor: pointer;
 }
 
+/* Grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+/* Card style */
+.card {
+  border-radius: 10px;
+  padding: 15px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 /* Status colors */
-.status.active {
-  color: green;
-  font-weight: bold;
+.card.active {
+  background-color: #2ecc71; /* green */
 }
 
-.status.paused {
-  color: orange;
-  font-weight: bold;
+.card.paused {
+  background-color: #f39c12; /* orange */
 }
 
-.status.down {
-  color: red;
-  font-weight: bold;
+.card.down {
+  background-color: #e74c3c; /* red */
 }
 
-.status.unknown {
-  color: gray;
-  font-weight: bold;
+/* Buttons */
+.actions {
+  margin-top: 10px;
 }
 
-.status.maintenance {
-  color: blue;
-  font-weight: bold;
+.actions button {
+  margin-right: 5px;
+  padding: 5px 8px;
+  cursor: pointer;
 }
-
