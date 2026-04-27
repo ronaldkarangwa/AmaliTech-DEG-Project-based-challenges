@@ -1,25 +1,20 @@
-import redis
 import json
 from datetime import datetime
-from app.redis_client import get_redis
-
+from redis_client import get_redis
 
 r = get_redis()
 
 def check_alerts():
-    # Subscribe to Redis key expiration events
     pubsub = r.pubsub()
-
-    # Requires Redis to be configured with 'notify-keyspace-events Ex' to receive expired key events    
     pubsub.subscribe('__keyevent@0__:expired')
+
     print("Alert system is running and listening for expired keys...")
 
-    # The infinite loop to listen for expired keys 
     for message in pubsub.listen():
-        if message['type'] == 'message':
+        if message["type"] != "message":
             continue
-        
-        key = msg["data"]
+
+        key = message["data"]
 
         if not isinstance(key, str) or not key.startswith("timer:"):
             continue
@@ -30,9 +25,11 @@ def check_alerts():
         if not metadata_raw:
             continue
 
-        meta = json.loads(metadata_raw)
+        try:
+            meta = json.loads(metadata_raw)
+        except Exception:
+            continue
 
-        # PAUSE SAFETY CHECK: If the monitor is paused, we should not mark it as down
         if meta.get("status") == "paused":
             continue
 

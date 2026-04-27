@@ -2,7 +2,7 @@ import redis
 
 def get_redis():
     return redis.StrictRedis(
-        host="redis",
+        host="localhost",
         port=6379,
         decode_responses=True
     )

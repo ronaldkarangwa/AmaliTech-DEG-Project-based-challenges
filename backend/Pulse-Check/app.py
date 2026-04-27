@@ -56,3 +56,7 @@ def pause(id):
     r.delete(f"timer:{id}")
 
     return jsonify({"message": "paused"}), 200
+
+
+if __name__ == "__main__":
+    app.run(port=5000)
