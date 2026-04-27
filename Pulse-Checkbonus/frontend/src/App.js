@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API = "http://localhost:5000";
+const API = "http://127.0.0.1:5000";
 
 function App() {
   const [monitors, setMonitors] = useState([]);
