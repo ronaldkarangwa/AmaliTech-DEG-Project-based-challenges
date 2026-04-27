@@ -6,49 +6,47 @@ const API = "http://127.0.0.1:5000";
 function App() {
   const [monitors, setMonitors] = useState([]);
 
-  // Fetch all devices
+  // GET all devices
   const fetchMonitors = async () => {
     try {
       const res = await fetch(`${API}/monitors`);
       const data = await res.json();
       setMonitors(data);
     } catch (err) {
-      console.error("Failed to fetch monitors:", err);
+      console.error("Fetch error:", err);
     }
   };
 
-  // Create new device
+  // Create device
   const createMonitor = async () => {
-    try {
-      await fetch(`${API}/monitors`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "device-" + Date.now(),
-          timeout: 10,
-          alert_email: "test@critmon.com"
-        })
-      });
+    await fetch(`${API}/monitors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: "device-" + Date.now(),
+        timeout: 10,
+        alert_email: "test@critmon.com"
+      })
+    });
 
-      fetchMonitors();
-    } catch (err) {
-      console.error("Create monitor failed:", err);
-    }
+    fetchMonitors();
   };
 
   // Heartbeat
   const heartbeat = async (id) => {
     await fetch(`${API}/monitors/${id}/heartbeat`, {
-      method: "POST",
+      method: "POST"
     });
+
     fetchMonitors();
   };
 
   // Pause
   const pause = async (id) => {
     await fetch(`${API}/monitors/${id}/pause`, {
-      method: "POST",
+      method: "POST"
     });
+
     fetchMonitors();
   };
 
@@ -60,11 +58,11 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h1>Pulse-Check Dashboard</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>Pulse Check Dashboard</h1>
 
-      <button onClick={createMonitor} style={{ marginBottom: "10px" }}>
-        Add Test Device
+      <button onClick={createMonitor}>
+        Add Device
       </button>
 
       <table border="1" cellPadding="10" width="100%">
@@ -78,41 +76,35 @@ function App() {
         </thead>
 
         <tbody>
-          {monitors.length === 0 ? (
-            <tr>
-              <td colSpan="4">No devices found</td>
+          {monitors.map((m) => (
+            <tr key={m.id}>
+              <td>{m.id}</td>
+
+              <td style={{
+                color:
+                  m.status === "down"
+                    ? "red"
+                    : m.status === "paused"
+                    ? "orange"
+                    : "green",
+                fontWeight: "bold"
+              }}>
+                {m.status}
+              </td>
+
+              <td>{m.timeout}</td>
+
+              <td>
+                <button onClick={() => heartbeat(m.id)}>
+                  Heartbeat
+                </button>
+
+                <button onClick={() => pause(m.id)}>
+                  Pause
+                </button>
+              </td>
             </tr>
-          ) : (
-            monitors.map((m) => (
-              <tr key={m.id}>
-                <td>{m.id}</td>
-
-                <td style={{
-                  color:
-                    m.status === "down"
-                      ? "red"
-                      : m.status === "paused"
-                      ? "orange"
-                      : "green",
-                  fontWeight: "bold"
-                }}>
-                  {m.status}
-                </td>
-
-                <td>{m.timeout}s</td>
-
-                <td>
-                  <button onClick={() => heartbeat(m.id)}>
-                    Heartbeat
-                  </button>
-
-                  <button onClick={() => pause(m.id)}>
-                    Pause
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
     </div>
