@@ -229,12 +229,14 @@ curl -X POST http://127.0.0.1:5000/monitors \
 
 ## ⭐ Developer’s Choice Feature
 
-### Pause Functionality
+### A simple react website to visualize the data
 
-A `/pause` endpoint allows temporary suspension of monitoring:
+The addition of a frontend improves the system in the following ways:
 
-* Prevents false alerts during maintenance
-* Automatically resumes on next heartbeat
+* Observability: Provides a real-time view of device states instead of relying on logs
+* Usability: Enables interaction with the API through a simple interface
+* Demonstration: Makes it easier to showcase the system’s behavior during testing and evaluation
+* Real-world alignment: Monitoring systems typically include dashboards for human operators
 
 ---
 
