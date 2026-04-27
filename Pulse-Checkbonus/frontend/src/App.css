@@ -40,3 +40,14 @@ button {
   color: red;
   font-weight: bold;
 }
+
+.status.unknown {
+  color: gray;
+  font-weight: bold;
+}
+
+.status.maintenance {
+  color: blue;
+  font-weight: bold;
+}
+
