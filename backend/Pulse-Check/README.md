@@ -1,7 +1,7 @@
 # Pulse-Check-API ("Watchdog" Sentinel)
 
-The Architecture Diagram
-sequenceDiagram
+#The Architecture Diagram
+<pre>sequenceDiagram
     participant Client
     participant API
     participant Timer
@@ -21,7 +21,7 @@ sequenceDiagram
 
     Timer-->>API: Timeout حدث
     API->>Alert: Trigger Alert
-    API-->>Client: State = Down
+    API-->>Client: State = Down </pre>
 
 # Transition Rules (Strict)
 1. POST /monitors
