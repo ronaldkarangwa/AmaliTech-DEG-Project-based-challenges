@@ -1,0 +1,66 @@
+.container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.add-btn {
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* Grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+/* Card style */
+.card {
+  border-radius: 10px;
+  padding: 15px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Status colors */
+.card.active {
+  background-color: #2ecc71; /* green */
+}
+
+.card.paused {
+  background-color: #f39c12; /* orange */
+}
+
+.card.down {
+  background-color: #e74c3c; /* red */
+}
+
+/* Buttons */
+.actions {
+  margin-top: 10px;
+}
+
+.actions button {
+  margin-right: 5px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.timer {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.card.active .timer {
+  color: #fff;
+}
+
+.card.down .timer {
+  color: #ffcccc;
+}
