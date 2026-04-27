@@ -6,18 +6,12 @@ const API = "http://127.0.0.1:5000";
 function App() {
   const [monitors, setMonitors] = useState([]);
 
-  // GET all devices
   const fetchMonitors = async () => {
-    try {
-      const res = await fetch(`${API}/monitors`);
-      const data = await res.json();
-      setMonitors(data);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    }
+    const res = await fetch(`${API}/monitors`);
+    const data = await res.json();
+    setMonitors(data);
   };
 
-  // Create device
   const createMonitor = async () => {
     await fetch(`${API}/monitors`, {
       method: "POST",
@@ -28,29 +22,19 @@ function App() {
         alert_email: "test@critmon.com"
       })
     });
-
     fetchMonitors();
   };
 
-  // Heartbeat
   const heartbeat = async (id) => {
-    await fetch(`${API}/monitors/${id}/heartbeat`, {
-      method: "POST"
-    });
-
+    await fetch(`${API}/monitors/${id}/heartbeat`, { method: "POST" });
     fetchMonitors();
   };
 
-  // Pause
   const pause = async (id) => {
-    await fetch(`${API}/monitors/${id}/pause`, {
-      method: "POST"
-    });
-
+    await fetch(`${API}/monitors/${id}/pause`, { method: "POST" });
     fetchMonitors();
   };
 
-  // Auto refresh
   useEffect(() => {
     fetchMonitors();
     const interval = setInterval(fetchMonitors, 2000);
@@ -58,55 +42,36 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Pulse Check Dashboard</h1>
+    <div className="container">
+      <h1>Pulse-Check Dashboard</h1>
 
-      <button onClick={createMonitor}>
-        Add Device
+      <button className="add-btn" onClick={createMonitor}>
+        + Add Device
       </button>
 
-      <table border="1" cellPadding="10" width="100%">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Status</th>
-            <th>Timeout</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <div className="grid">
+        {monitors.map((m) => (
+          <div key={m.id} className={`card ${m.status}`}>
+            <h2>{m.id}</h2>
 
-        <tbody>
-          {monitors.map((m) => (
-            <tr key={m.id}>
-              <td>{m.id}</td>
+            <p>
+              Status: <span className="status">{m.status}</span>
+            </p>
 
-              <td style={{
-                color:
-                  m.status === "down"
-                    ? "red"
-                    : m.status === "paused"
-                    ? "orange"
-                    : "green",
-                fontWeight: "bold"
-              }}>
-                {m.status}
-              </td>
+            <p>Timeout: {m.timeout}s</p>
 
-              <td>{m.timeout}</td>
+            <div className="actions">
+              <button onClick={() => heartbeat(m.id)}>
+                Heartbeat
+              </button>
 
-              <td>
-                <button onClick={() => heartbeat(m.id)}>
-                  Heartbeat
-                </button>
-
-                <button onClick={() => pause(m.id)}>
-                  Pause
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              <button onClick={() => pause(m.id)}>
+                Pause
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
