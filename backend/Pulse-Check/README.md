@@ -1,27 +1,6 @@
 # Pulse-Check-API ("Watchdog" Sentinel)
 
-#The Architecture Diagram
-<pre>sequenceDiagram
-    participant Client
-    participant API
-    participant Timer
-    participant Alert
-
-    Client->>API: POST /monitors
-    API->>Timer: Start Timer
-    API-->>Client: State = Active
-
-    Client->>API: POST /heartbeat
-    API->>Timer: Reset Timer
-    API-->>Client: State = Active
-
-    Client->>API: POST /pause
-    API->>Timer: Stop Timer
-    API-->>Client: State = Paused
-
-    Timer-->>API: Timeout حدث
-    API->>Alert: Trigger Alert
-    API-->>Client: State = Down </pre>
+<pre> ## Sequence Diagram ```mermaid sequenceDiagram participant Client participant API participant Timer participant Alert Client->>API: POST /monitors API->>Timer: Start Timer API-->>Client: State = Active Client->>API: POST /heartbeat API->>Timer: Reset Timer API-->>Client: State = Active Client->>API: POST /pause API->>Timer: Stop Timer API-->>Client: State = Paused Timer-->>API: Timeout API->>Alert: Trigger Alert ``` </pre>
 
 # Transition Rules (Strict)
 1. POST /monitors
