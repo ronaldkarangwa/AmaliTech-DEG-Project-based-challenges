@@ -1,69 +1,249 @@
-# Pulse-Check-API ("Watchdog" Sentinel)
-## Architecture Sequence Diagram
-The system follows an event-driven pattern using a Shadow Key strategy
- 1. Metadata Key: Stores device info permanently
- 2. Timer Key: A volatile key with TTL (Time-To-Live)
- 3. The Sentinel: A background worker listening for the expired event to trigger alerts.
+# Pulse-Check-API (Watchdog Sentinel)
+
+A lightweight **Dead Man’s Switch backend service** designed to monitor remote devices and trigger alerts when they stop sending heartbeats.
+
+---
+
+## 🚀 Overview
+
+CritMon Servers Inc. monitors remote infrastructure (e.g., solar farms, weather stations) where connectivity is unreliable. Devices must periodically send “I’m alive” signals.
+
+This project implements a **stateful timer system** that:
+
+* Registers devices with a timeout
+* Resets timers on heartbeat signals
+* Automatically triggers alerts when devices go silent
+
+---
+
+## 🧠 Architecture
 
 ```mermaid
 sequenceDiagram
-    participant D as Remote Device
-    participant A as Flask API
-    participant R as Redis
-    participant W as Worker (Sentinel)
+    participant Device
+    participant API
+    participant Redis
+    participant Worker
 
-    D->>A: POST /monitors (Initial Setup)
-    A->>R: SET monitor:id (Metadata)
-    A->>R: SETEX timer:id (TTL Start)
-    
-    Note over D, R: Normal Operation
-    D->>A: POST /heartbeat
-    A->>R: SETEX timer:id (TTL Reset)
+    Device->>API: POST /monitors (register)
+    API->>Redis: Store metadata + set TTL
 
-    Note over R, W: On Failure (No Heartbeat)
-    R-->>W: Key Expired Notification
-    W->>R: GET monitor:id
-    W->>W: Console Log Alert
+    loop Every second
+        Redis-->>Worker: Expired key event
+        Worker->>Redis: Fetch metadata
+        Worker->>Worker: Mark as DOWN
+        Worker->>Console: Trigger ALERT
+    end
+
+    Device->>API: POST /monitors/{id}/heartbeat
+    API->>Redis: Reset TTL
+
+    Device->>API: POST /monitors/{id}/pause
+    API->>Redis: Pause monitor
 ```
-## Tech Stack
-Language: Python 3.x
 
-Framework: Flask (API Layer)
+---
 
-State Store: Redis (Expiration & Metadata)
+## ⚙️ Tech Stack
 
-Concurrency: Event-driven Pub/Sub worker
+* Python 3.11
+* Flask (API)
+* Redis (state + TTL timers)
+* Redis Pub/Sub (event-driven alerts)
 
-## Setup Instructions
-Prerequisites
-Python 3.8+
-Redis Server (running on localhost:6379)
+---
 
-Installation
-Clone the repository:
+## 📦 Setup Instructions (Local / Chromebook)
 
-Bash
-git clone <https://github.com/ronaldkarangwa/AmaliTech-DEG-Project-based-challenges.git>
-cd Pulse-check
-Install dependencies:
+### 1. Clone Repository
 
-Bash
-pip install flask redis
-Enable Redis Expiration Events:
-This system requires Redis notifications to be turned on:
+```bash
+git clone <your-repo-url>
+cd pulse-check-api
+```
 
-Bash
-redis-cli CONFIG SET notify-keyspace-events Ex
-Running the System
-You must run the API and the Worker in two separate terminal windows:
+### 2. Create Virtual Environment
 
-Window 1 (API): python app.py
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-Window 2 (Sentinel): python alert.py
+### 3. Install Dependencies
 
+```bash
+pip install -r requirements.txt
+```
 
-## API Documentation
-Endpoint,Method,Description
-/monitors,POST,Registers a new device and starts the countdown.
-/monitors/<id>/heartbeat,POST,Resets the timer to the original duration.
-/monitors/<id>/pause,POST,Stops the timer (Maintenance Mode).
+### 4. Start Redis (IMPORTANT)
+
+```bash
+redis-server --notify-keyspace-events Ex
+```
+
+---
+
+## ▶️ Running the System
+
+Open **3 terminals**:
+
+### Terminal 1 — Redis
+
+```bash
+redis-server --notify-keyspace-events Ex
+```
+
+### Terminal 2 — Alert Worker
+
+```bash
+source venv/bin/activate
+python3 alert.py
+```
+
+Expected:
+
+```
+Alert system is running and listening for expired keys...
+```
+
+### Terminal 3 — API Server
+
+```bash
+source venv/bin/activate
+python3 app.py
+```
+
+---
+
+## 📡 API Endpoints
+
+### 1. Register Monitor
+
+`POST /monitors`
+
+```json
+{
+  "id": "device-123",
+  "timeout": 60,
+  "alert_email": "admin@critmon.com"
+}
+```
+
+Response:
+
+```
+201 Created
+```
+
+---
+
+### 2. Send Heartbeat
+
+`POST /monitors/{id}/heartbeat`
+
+Resets the timer.
+
+Response:
+
+```
+200 OK
+```
+
+---
+
+### 3. Pause Monitor (Bonus Feature)
+
+`POST /monitors/{id}/pause`
+
+Stops monitoring temporarily.
+
+---
+
+## 🧪 Testing the System
+
+### Create a monitor
+
+```bash
+curl -X POST http://127.0.0.1:5000/monitors \
+-H "Content-Type: application/json" \
+-d '{"id":"test1","timeout":5,"alert_email":"a@b.com"}'
+```
+
+### Expected behavior:
+
+* Wait ~5 seconds
+* Alert appears in worker terminal:
+
+```json
+{
+  "ALERT": "Device test1 is down!",
+  "time": "2026-..."
+}
+```
+
+---
+
+## 🚨 Alert Logic
+
+* Redis TTL expiration triggers event
+* Worker listens via Pub/Sub
+* On expiration:
+
+  * Monitor marked as `down`
+  * Alert is logged (simulating webhook/email)
+
+---
+
+## ⭐ Developer’s Choice Feature
+
+### Pause Functionality
+
+A `/pause` endpoint allows temporary suspension of monitoring:
+
+* Prevents false alerts during maintenance
+* Automatically resumes on next heartbeat
+
+---
+
+## 🔧 Design Decisions
+
+* **Redis TTL** used for efficient timer management
+* **Pub/Sub model** enables event-driven architecture
+* **Separation of concerns**:
+
+  * API → state updates
+  * Worker → alert handling
+
+---
+
+## ⚠️ Known Limitations
+
+* Redis keyspace notifications must be enabled manually
+* Alerts are logged (not sent via real email/webhook)
+* In-memory Redis (no persistence configured)
+
+---
+
+## 🚀 Future Improvements
+
+* Webhook / email integration
+* Retry mechanism for alerts
+* Distributed worker system
+* Monitoring dashboard (UI)
+* Redis persistence / clustering
+
+---
+
+## 🏁 Conclusion
+
+This project demonstrates:
+
+* Stateful backend design
+* Event-driven architecture
+* Real-world monitoring system patterns
+
+---
+
+## 👨‍💻 Author
+
+Gahima Karangwa Ronald
