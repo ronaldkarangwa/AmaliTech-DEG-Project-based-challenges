@@ -61,7 +61,7 @@ def pause(monitor_id):
     return jsonify({"message": "paused"}), 200
 
 
-# ✅ ADD THIS (VERY IMPORTANT for React dashboard)
+
 @app.route("/monitors", methods=["GET"])
 def get_monitors():
     keys = r.keys("monitor:*")
