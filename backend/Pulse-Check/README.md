@@ -1,44 +1,69 @@
 # Pulse-Check-API ("Watchdog" Sentinel)
 ## Architecture Sequence Diagram
+The system follows an event-driven pattern using a Shadow Key strategy
+ 1. Metadata Key: Stores device info permanently
+ 2. Timer Key: A volatile key with TTL (Time-To-Live)
+ 3. The Sentinel: A background worker listening for the expired event to trigger alerts.
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant API
-    participant Timer
-    participant Alert
+    participant D as Remote Device
+    participant A as Flask API
+    participant R as Redis
+    participant W as Worker (Sentinel)
 
-    Client->>API: POST /monitors
-    API->>Timer: Start Timer
-    API-->>Client: State = Active
+    D->>A: POST /monitors (Initial Setup)
+    A->>R: SET monitor:id (Metadata)
+    A->>R: SETEX timer:id (TTL Start)
+    
+    Note over D, R: Normal Operation
+    D->>A: POST /heartbeat
+    A->>R: SETEX timer:id (TTL Reset)
 
-    Client->>API: POST /heartbeat
-    API->>Timer: Reset Timer
-    API-->>Client: State = Active
-
-    Client->>API: POST /pause
-    API->>Timer: Stop Timer
-    API-->>Client: State = Paused
-
-    Timer-->>API: Timeout
-    API->>Alert: Trigger Alert
+    Note over R, W: On Failure (No Heartbeat)
+    R-->>W: Key Expired Notification
+    W->>R: GET monitor:id
+    W->>W: Console Log Alert
 ```
+## Tech Stack
+Language: Python 3.x
 
-# Transition Rules (Strict)
-1. POST /monitors:
-Null → Active,
-Starts timer,
-If already exists:
-Reject (409 Conflict)
-2. POST /heartbeat:
-Active → Active → reset timer,
-Paused → Active → start timer,
-Down → (ignored or rejected) ← important constraint
-3. POST /pause:
-Active → Paused → stop/clear timer,
-Paused → Paused (idempotent),
-Down → (invalid)
-4. Timeout Event:
-Active → Down,
-Trigger alert exactly once,
-Timer must not continue running after this 
+Framework: Flask (API Layer)
+
+State Store: Redis (Expiration & Metadata)
+
+Concurrency: Event-driven Pub/Sub worker
+
+## Setup Instructions
+Prerequisites
+Python 3.8+
+Redis Server (running on localhost:6379)
+
+Installation
+Clone the repository:
+
+Bash
+git clone <https://github.com/ronaldkarangwa/AmaliTech-DEG-Project-based-challenges.git>
+cd Pulse-check
+Install dependencies:
+
+Bash
+pip install flask redis
+Enable Redis Expiration Events:
+This system requires Redis notifications to be turned on:
+
+Bash
+redis-cli CONFIG SET notify-keyspace-events Ex
+Running the System
+You must run the API and the Worker in two separate terminal windows:
+
+Window 1 (API): python app.py
+
+Window 2 (Sentinel): python alert.py
+
+
+## API Documentation
+Endpoint,Method,Description
+/monitors,POST,Registers a new device and starts the countdown.
+/monitors/<id>/heartbeat,POST,Resets the timer to the original duration.
+/monitors/<id>/pause,POST,Stops the timer (Maintenance Mode).

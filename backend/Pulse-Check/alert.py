@@ -10,6 +10,7 @@ def check_alerts():
     pubsub.subscribe('__keyevent@0__:expired')
     print("Alert system is running and listening for expired keys...")
 
+    # The infinite loop to listen for expired keys 
     for message in pubsub.listen():
         if message['type'] == 'message':
             expired_key = message['data']
