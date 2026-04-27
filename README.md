@@ -264,7 +264,6 @@ The addition of a frontend improves the system in the following ways:
 * Webhook / email integration
 * Retry mechanism for alerts
 * Distributed worker system
-* Monitoring dashboard (UI)
 * Redis persistence / clustering
 
 ---

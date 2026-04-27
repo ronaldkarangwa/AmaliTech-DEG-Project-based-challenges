@@ -51,3 +51,16 @@ h1 {
   padding: 5px 8px;
   cursor: pointer;
 }
+
+.timer {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.card.active .timer {
+  color: #fff;
+}
+
+.card.down .timer {
+  color: #ffcccc;
+}
