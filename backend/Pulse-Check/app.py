@@ -1,43 +1,58 @@
 import json
 from flask import Flask, request, jsonify
-import redis
+import app.redis_client import get_redis
 
 app = Flask(__name__)
-r = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
+r = get_redis()
 
 @app.route('/monitors', methods=['POST'])
 def create_monitor():
     data = request.json
-    monitor_id = data.get('id')
-    timeout = data.get('timeout')
-    email = data.get('alert_email')
+
+    monitor_id = data["id"]
+    timeout = data["timeout"]
+    email = data["alert_email"]
 
     # Store Metadata in Redis
-    r.set(f'monitor:{monitor_id}', json.dumps({
+    r.set(
+        f'monitor:{monitor_id}",
+        json.dumps({
         "alert_email": email,
         "status": "active"
         "timeout": timeout
-    }))
+        })
+    )
 
     # Start the Timer Key (Empty Value, expires in 'timeout' seconds)
     r.setex(f"timer:{monitor_id}", timeout, "active")
+    return jsonify({"message": "Monitor created successfully"}), 201
 
-    return jsonify({"message": "Monitor created successfully", "monitor_id": monitor_id}), 201
+    
 
 @app.route('/monitors/<monitor_id>/heartbeat', methods=['POST'])
-def heartbeat(monitor_id):
-    metadata_raw = r.get(f'monitor:{monitor_id}')
+def heartbeat(id):
+    metadata_raw = r.get(f'monitor:{id}')
     if not metadata_raw:
         return jsonify({"error": "Monitor not found"}), 404
-    metadata = json.loads(metadata_raw)
+    
+    meta = json.loads(metadata_raw)
+    meta["status"] = "active"
+    
+    r.set(f'monitor:{id}', json.dumps(meta))
+    r.setex(f"timer:{id}", meta["timeout"], "active")
 
-    # Reset the Timer Key using original timeout
-    r.setex(f"timer:{monitor_id}", metadata["timeout"], "active")
+    return jsonify({"message": "Heartbeat received"}), 200
 
-    # Update status incase it was 'down' or 'paused'
-    metadata["status"] = "active"
-    r.set(f'monitor:{monitor_id}', json.dumps(metadata))
-    return jsonify({"message": "Heartbeat received successfully"}), 200
+@app.route("/monitors/<id>/pause", methods=["POST"])
+def pause(id):
+    metadata_raw = r.get(f"monitor:{id}")
+    if not metadata_raw:
+        return jsonify({"error": "not found"}), 404
 
-if __name__ == '__main__':
-    app.run(port=5000)
+    meta = json.loads(metadata_raw)
+    meta["status"] = "paused"
+
+    r.set(f"monitor:{id}", json.dumps(meta))
+    r.delete(f"timer:{id}")
+
+    return jsonify({"message": "paused"}), 200

@@ -16,7 +16,7 @@ def check_alerts():
             expired_key = message['data']
             
             # Check if the expired key is a timer key
-            if expired_key.startswith("timer:"):
+            if isinstance(expired_key, str) and expired_key.startswith("timer:"):
                 monitor_id = expired_key.split(":")[1]
                 # Fetch monitor metadata to get alert email
                 metadata_raw = r.get(f'monitor:{monitor_id}')
