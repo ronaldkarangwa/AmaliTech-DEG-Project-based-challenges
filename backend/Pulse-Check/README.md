@@ -58,8 +58,8 @@ sequenceDiagram
 ### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
-cd pulse-check-api
+git clone <https://github.com/ronaldkarangwa/AmaliTech-DEG-Project-based-challenges.git>
+cd Pulse-Check
 ```
 
 ### 2. Create Virtual Environment
