@@ -1,5 +1,5 @@
 # Pulse-Check-API ("Watchdog" Sentinel)
-## Sequence Diagram
+## Architecture Sequence Diagram
 
 ```mermaid
 sequenceDiagram
