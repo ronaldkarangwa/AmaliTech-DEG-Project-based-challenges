@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7
+    command: redis-server --notify-keyspace-events Ex
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    depends_on:
+      - redis
+
+  alert:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.alert
+    depends_on:
+      - redis
