@@ -1,52 +1,41 @@
+import redis
 import json
-import requests
-from datetime import datetime
-from redis_client import get_redis
 
-requests.post("http://localhost:5000/alerts", json={
-    "id": monitor_id,
-    "message": f"Device {monitor_id} is down"
-})
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+pubsub = r.pubsub()
 
-r = get_redis()
+pubsub.psubscribe('__keyevent@0__:expired')
 
-def check_alerts():
-    pubsub = r.pubsub()
-    pubsub.subscribe('__keyevent@0__:expired')
+print("Worker listening for expired timers...")
 
-    print("Alert system is running and listening for expired keys...")
+for msg in pubsub.listen():
+    if msg["type"] != "pmessage":
+        continue
 
-    for message in pubsub.listen():
-        if message["type"] != "message":
-            continue
+    key = msg["data"]
 
-        key = message["data"]
+    if not key.startswith("timer:"):
+        continue
 
-        if not isinstance(key, str) or not key.startswith("timer:"):
-            continue
+    monitor_id = key.split(":")[1]
+    meta_raw = r.get(f"monitor:{monitor_id}")
 
-        monitor_id = key.split(":")[1]
-        metadata_raw = r.get(f"monitor:{monitor_id}")
+    if not meta_raw:
+        continue
 
-        if not metadata_raw:
-            continue
+    meta = json.loads(meta_raw)
 
-        try:
-            meta = json.loads(metadata_raw)
-        except Exception:
-            continue
+    if meta.get("status") == "paused":
+        continue
 
-        if meta.get("status") == "paused":
-            continue
+    # Mark as DOWN
+    meta["status"] = "down"
+    r.set(f"monitor:{monitor_id}", json.dumps(meta))
 
-        meta["status"] = "down"
-        r.set(f"monitor:{monitor_id}", json.dumps(meta))
+    # 🔥 Publish event (THIS is the important part)
+    r.publish("alerts", json.dumps({
+        "id": monitor_id,
+        "status": "down"
+    }))
 
-        print(json.dumps({
-            "ALERT": f"Device {monitor_id} is down!",
-            "time": datetime.utcnow().isoformat()
-        }))
-
-
-if __name__ == "__main__":
-    check_alerts()
+    print(f"[ALERT] {monitor_id} is DOWN")
