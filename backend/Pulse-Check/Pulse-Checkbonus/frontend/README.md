@@ -61,7 +61,7 @@ frontend/
 
 ## ⚙️ Installation
 
-### 1. Navigate to frontend
+## 1. Navigate to frontend
 
 ```bash
 cd frontend
