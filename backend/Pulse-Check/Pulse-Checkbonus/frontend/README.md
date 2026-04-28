@@ -43,6 +43,7 @@ Redis (TTL + Keyspace Events)
 
 ---
 
+</>
 ## 📁 Project Structure
 frontend/
 │
@@ -75,14 +76,8 @@ npm start
 App runs on:
 http://127.0.0.1:5000
 
-🔌 Backend Requirement
 
-Make sure the backend is running on:
-🔌 Backend Requirement
-
-Make sure the backend is running on:
-
-🔗 WebSocket Connection
+## 🔗 WebSocket Connection
 
 Defined in:
 // src/socket.js
@@ -90,12 +85,12 @@ import { io } from "socket.io-client";
 
 export const socket = io("http://127.0.0.1:5000");
 
-⏱ Countdown Logic
+## ⏱ Countdown Logic
 
 The countdown is calculated on the frontend:
 const diff = expires_at - current_time;
 
-🚨 Alerts System
+## 🚨 Alerts System
 
 When a device goes down:
 
@@ -111,7 +106,7 @@ Example:
   "time": 1710000000
 }
 
-🎨 UI States
+## 🎨 UI States
 | Status | Color | Behavior          |
 | ------ | ----- | ----------------- |
 | active | Green | Countdown running |
@@ -125,7 +120,7 @@ WebSocket not connecting
 Check browser console:
 Connected: <socket_id>
 
-📈 Future Improvements
+## 📈 Future Improvements
 Authentication
 Historical logs
 Notifications (email/SMS)
