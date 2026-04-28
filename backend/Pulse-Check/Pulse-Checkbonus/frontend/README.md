@@ -57,9 +57,8 @@ frontend/
 ├── public/
 ├── package.json
 └── README.md
+```
 
-
----
 
 ## ⚙️ Installation
 
