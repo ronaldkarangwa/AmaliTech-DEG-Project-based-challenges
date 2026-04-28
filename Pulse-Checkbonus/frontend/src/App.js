@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import { io } from "socket.io-client";
+
+const socket = io("http://127.0.0.1:5000");
+
 
 function App() {
   const [monitors, setMonitors] = useState([]);
@@ -14,6 +18,26 @@ function App() {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+  socket.on("alert", (data) => {
+    console.log("ALERT RECEIVED:", data);
+
+    // 🔥 Update UI instantly
+    setMonitors(prev =>
+      prev.map(m =>
+        m.id === data.id ? { ...m, status: "down" } : m
+      )
+    );
+
+    // Optional popup
+    alert(`🚨 Device ${data.id} is DOWN`);
+  });
+
+  return () => {
+    socket.off("alert");
+  };
+}, []);
 
   // Fetch monitors
   useEffect(() => {
