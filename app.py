@@ -9,6 +9,21 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 r = get_redis()
 
+def redis_listener():
+    pubsub = r.pubsub()
+    pubsub.subscribe("alerts")
+
+    for msg in pubsub.listen():
+        if msg["type"] != "message":
+            continue
+
+        data = json.loads(msg["data"])
+
+        # Push to React instantly
+        socketio.emit("alert", data)
+
+threading.Thread(target=redis_listener, daemon=True).start()
+
 
 @app.route('/monitors', methods=['POST'])
 def create_monitor():
@@ -97,4 +112,4 @@ def get_alerts():
     return jsonify(alerts)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000)
