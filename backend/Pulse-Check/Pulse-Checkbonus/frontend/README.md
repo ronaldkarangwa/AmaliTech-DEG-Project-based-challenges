@@ -43,7 +43,8 @@ Redis (TTL + Keyspace Events)
 
 ---
 
-</>
+</> Markdown
+```bash
 ## 📁 Project Structure
 frontend/
 │
