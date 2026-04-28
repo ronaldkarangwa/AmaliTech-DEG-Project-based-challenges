@@ -8,7 +8,7 @@ CORS(app)
 
 r = get_redis() 
 alerts = []
-expiry = int(time()) + timeout
+
 
 @app.route('/monitors', methods=['POST'])
 def create_monitor():
@@ -63,23 +63,25 @@ def pause(monitor_id):
 
 
 
-@app.route("/monitors", methods=["GET"])
+@app.route('/monitors', methods=['GET'])
 def get_monitors():
     keys = r.keys("monitor:*")
     monitors = []
 
     for key in keys:
-        monitor_id = key.split(":")[1]
-        meta = json.loads(r.get(key))
+        data = r.get(key)
+        if data:
+            monitor_id = key.decode().split(":")[1]
+            meta = json.loads(data)
 
-        ttl = r.ttl(f"timer:{monitor_id}")  # seconds remaining
+            ttl = r.ttl(f"timer:{monitor_id}")
 
-        monitors.append({
-            "id": monitor_id,
-            "status": meta["status"],
-            "timeout": meta["timeout"],
-            "remaining": ttl if ttl > 0 else 0
-        })
+            monitors.append({
+                "id": monitor_id,
+                "status": meta["status"],
+                "timeout": meta["timeout"],
+                "time_left": max(ttl, 0)
+            })
 
     return jsonify(monitors)
 
