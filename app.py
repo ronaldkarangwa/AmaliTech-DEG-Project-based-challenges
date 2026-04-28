@@ -1,13 +1,13 @@
+from flask_socketio import SocketIO
+import redis
 import json
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from redis_client import get_redis
+import threading
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
 
-r = get_redis() 
-alerts = []
+socketio = SocketIO(app, cors_allowed_origins="*")
+r = get_redis()
 
 
 @app.route('/monitors', methods=['POST'])
