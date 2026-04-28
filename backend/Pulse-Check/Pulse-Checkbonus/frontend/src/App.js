@@ -86,6 +86,7 @@ function App() {
               <button onClick={() => heartbeat(m.id)}>
                 Heartbeat
               </button>
+            
 
               <button onClick={() => pause(m.id)}>
                 Pause

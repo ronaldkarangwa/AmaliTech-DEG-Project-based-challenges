@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app)  
 
 r = get_redis()
+DEFAULT_TIME_OUT = 60  # seconds
 
 
 @app.route('/monitors', methods=['POST'])
@@ -14,7 +15,7 @@ def create_monitor():
     data = request.json
 
     monitor_id = data["id"]
-    timeout = data["timeout"]
+    timeout = data.get("timeout", DEFAULT_TIME_OUT)
     email = data["alert_email"]
 
     r.set(

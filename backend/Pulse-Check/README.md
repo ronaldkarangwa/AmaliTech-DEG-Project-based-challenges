@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # DEG Project Challenges
 
 This repository contains the DEG training project challenges across multiple tracks:
@@ -281,4 +281,4 @@ This project demonstrates:
 ## 👨‍💻 Author
 
 Gahima Karangwa Ronald
->>>>>>> 173d9fd (Added a README for the frontend Developer's choice feature)
+
