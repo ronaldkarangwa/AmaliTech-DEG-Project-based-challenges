@@ -30,6 +30,25 @@ function App() {
     fetchMonitors();
   };
 
+  const DEFAULT_TIMEOUT = 60; // seconds
+  const getCountdown = (expiresAt, timeout = DEFAULT_TIMEOUT) => {
+  const now = Math.floor(Date.now() / 1000);
+  const diff = expiresAt - now;
+
+  if (diff <= 0) return "0s";
+
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+
+  return `${m}m ${s}s`;
+};
+  const getProgress = (expiresAt, timeout = 60) => {
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = expiresAt - now;
+
+  return Math.max(0, Math.min(100, (remaining / timeout) * 100));
+};
+
   const pause = async (id) => {
     await fetch(`${API}/monitors/${id}/pause`, { method: "POST" });
     fetchMonitors();
@@ -42,6 +61,7 @@ function App() {
   }, []);
 
   return (
+    
     <div className="container">
       <h1>Pulse-Check Dashboard</h1>
 
