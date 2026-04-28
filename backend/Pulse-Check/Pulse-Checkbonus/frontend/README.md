@@ -43,7 +43,6 @@ Redis (TTL + Keyspace Events)
 
 ---
 
-</> Markdown
 ```bash
 ## 📁 Project Structure
 frontend/
@@ -75,6 +74,8 @@ npm start
 
 App runs on:
 http://127.0.0.1:5000
+
+```
 
 
 ## 🔗 WebSocket Connection
