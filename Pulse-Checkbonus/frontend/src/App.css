@@ -1,0 +1,42 @@
+.container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+h1 {
+  color: #222;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+button {
+  margin: 0 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+/* Status colors */
+.status.active {
+  color: green;
+  font-weight: bold;
+}
+
+.status.paused {
+  color: orange;
+  font-weight: bold;
+}
+
+.status.down {
+  color: red;
+  font-weight: bold;
+}
