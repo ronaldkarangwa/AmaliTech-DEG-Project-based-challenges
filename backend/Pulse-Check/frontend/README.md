@@ -1,132 +1,70 @@
-# 📡 Pulse Check Dashboard (Frontend)
+# Getting Started with Create React App
 
-A real-time monitoring dashboard for tracking device health using WebSockets and live countdown timers.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-This frontend connects to a Flask backend and displays:
-- 📡 Active devices (monitors)
-- ⏱ Live countdown timers (TTL-based)
-- 🚨 Instant alerts when devices go down
-- 🔄 Real-time updates via WebSockets (no polling)
+## Available Scripts
 
----
+In the project directory, you can run:
 
-## 🚀 Features
+### `npm start`
 
-- ⚡ Real-time updates using WebSockets (Socket.IO)
-- ⏱ Accurate countdown timers (updated every second)
-- 🚨 Live alert popups when a device goes down
-- 🎯 Status-based UI (active / down / paused)
-- 📊 Clean card-based dashboard layout
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
----
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-## 🧠 Architecture Overview
-Frontend (React)
-↓ WebSocket (Socket.IO)
-Backend (Flask + SocketIO)
-↓ Pub/Sub
-Redis (TTL + Keyspace Events)
+### `npm test`
 
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-- Backend sends `expires_at` timestamps
-- Frontend calculates countdown locally (efficient)
-- Alerts are pushed instantly via WebSocket
+### `npm run build`
 
----
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## 📦 Tech Stack
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-- React
-- Socket.IO Client
-- CSS
-- Fetch API
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
----
+### `npm run eject`
 
-```bash
-## 📁 Project Structure
-frontend/
-│
-├── src/
-│ ├── App.js
-│ ├── socket.js
-│ ├── App.css
-│ └── index.js
-│
-├── public/
-├── package.json
-└── README.md
-```
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-## ⚙️ Installation
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-## 1. Navigate to frontend
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-```bash
-cd frontend
+## Learn More
 
-2. Install dependencies
-npm install
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-3. Start the app
-npm start
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-App runs on:
-http://127.0.0.1:5000
+### Code Splitting
 
-```
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
+### Analyzing the Bundle Size
 
-## 🔗 WebSocket Connection
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-Defined in:
-// src/socket.js
-import { io } from "socket.io-client";
+### Making a Progressive Web App
 
-export const socket = io("http://127.0.0.1:5000");
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-## ⏱ Countdown Logic
+### Advanced Configuration
 
-The countdown is calculated on the frontend:
-const diff = expires_at - current_time;
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-## 🚨 Alerts System
+### Deployment
 
-When a device goes down:
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-Redis detects key expiration
-Backend publishes alert
-WebSocket pushes alert
-UI displays popup instantly
+### `npm run build` fails to minify
 
-Example:
-{
-  "id": "device1",
-  "message": "🚨 device1 is DOWN",
-  "time": 1710000000
-}
-
-## 🎨 UI States
-| Status | Color | Behavior          |
-| ------ | ----- | ----------------- |
-| active | Green | Countdown running |
-| down   | Red   | Alert state       |
-| paused | Gray  | Timer stopped     |
-
-
-
-WebSocket not connecting
-
-Check browser console:
-Connected: <socket_id>
-
-## 📈 Future Improvements
-Authentication
-Historical logs
-Notifications (email/SMS)
-Docker deployment
-
-👨‍💻 Author
-
-Real-time monitoring dashboard built with React, Flask, Redis, and WebSockets.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

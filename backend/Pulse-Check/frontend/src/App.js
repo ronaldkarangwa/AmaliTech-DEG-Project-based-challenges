@@ -1,97 +1,92 @@
-import { useEffect, useState } from "react";
-import "./App.css";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { io } from "socket.io-client";
 
-const API = "http://127.0.0.1:5000";
+const socket = io("http://localhost:5000");
 
 function App() {
   const [monitors, setMonitors] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
+  // Fetch monitors
   const fetchMonitors = async () => {
-    const res = await fetch(`${API}/monitors`);
-    const data = await res.json();
-    setMonitors(data);
+    try {
+      const res = await axios.get("http://localhost:5000/monitors");
+      setMonitors(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const createMonitor = async () => {
-    await fetch(`${API}/monitors`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: "device-" + Date.now(),
-        timeout: 15,
-        alert_email: "test@critmon.com"
-      })
-    });
-    fetchMonitors();
-  };
-
-  const heartbeat = async (id) => {
-    await fetch(`${API}/monitors/${id}/heartbeat`, { method: "POST" });
-    fetchMonitors();
-  };
-
-  const DEFAULT_TIMEOUT = 60; // seconds
-  const getCountdown = (expiresAt, timeout = DEFAULT_TIMEOUT) => {
-  const now = Math.floor(Date.now() / 1000);
-  const diff = expiresAt - now;
-
-  if (diff <= 0) return "0s";
-
-  const m = Math.floor(diff / 60);
-  const s = diff % 60;
-
-  return `${m}m ${s}s`;
-};
-  const getProgress = (expiresAt, timeout = 60) => {
-  const now = Math.floor(Date.now() / 1000);
-  const remaining = expiresAt - now;
-
-  return Math.max(0, Math.min(100, (remaining / timeout) * 100));
-};
-
-  const pause = async (id) => {
-    await fetch(`${API}/monitors/${id}/pause`, { method: "POST" });
-    fetchMonitors();
-  };
-
+  // WebSocket listener
   useEffect(() => {
+    socket.on("alert", (data) => {
+      setAlerts((prev) => [...prev, data]);
+      fetchMonitors(); // refresh state when alert comes
+    });
+
     fetchMonitors();
-    const interval = setInterval(fetchMonitors, 1000); // every second
+
+    return () => socket.off("alert");
+  }, []);
+
+  // Countdown updater
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMonitors((prev) =>
+        prev.map((m) => ({
+          ...m,
+          remaining: m.remaining > 0 ? m.remaining - 1 : 0
+        }))
+      );
+    }, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    
-    <div className="container">
-      <h1>Pulse-Check Dashboard</h1>
+  const getStatusColor = (status) => {
+    if (status === "active") return "#22c55e";
+    if (status === "paused") return "#f59e0b";
+    if (status === "down") return "#ef4444";
+    return "#64748b";
+  };
 
-      <button className="add-btn" onClick={createMonitor}>
-        + Add Device
-      </button>
+  return (
+    <div className="container">
+      <h1>Pulse Check Dashboard</h1>
 
       <div className="grid">
         {monitors.map((m) => (
-          <div key={m.id} className={`card ${m.status}`}>
+          <div className="card" key={m.id}>
             <h2>{m.id}</h2>
 
-            <p>Status: {m.status}</p>
+            <div
+              className="status"
+              style={{ background: getStatusColor(m.status) }}
+            >
+              {m.status.toUpperCase()}
+            </div>
 
             <p>Timeout: {m.timeout}s</p>
+            <p>Remaining: {m.remaining}s</p>
 
-            <p className="timer">
-              ⏳ {m.status === "active" ? m.remaining : "-"}s
-            </p>
-
-            <div className="actions">
-              <button onClick={() => heartbeat(m.id)}>
-                Heartbeat
-              </button>
-            
-
-              <button onClick={() => pause(m.id)}>
-                Pause
-              </button>
+            <div className="progress-bar">
+              <div
+                className="progress"
+                style={{
+                  width: `${(m.remaining / m.timeout) * 100}%`
+                }}
+              />
             </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="alerts">
+        <h2>Alerts</h2>
+        {alerts.map((a, i) => (
+          <div key={i} className="alert">
+            {a.id}: {a.message}
           </div>
         ))}
       </div>

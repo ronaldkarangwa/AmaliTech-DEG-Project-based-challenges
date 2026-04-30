@@ -1,66 +1,60 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
 .container {
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
 h1 {
-  margin-bottom: 10px;
-}
-
-.add-btn {
+  text-align: center;
   margin-bottom: 20px;
-  padding: 8px 12px;
-  cursor: pointer;
 }
 
-/* Grid layout */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
+  gap: 16px;
 }
 
-/* Card style */
 .card {
-  border-radius: 10px;
-  padding: 15px;
-  color: white;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* Status colors */
-.card.active {
-  background-color: #2ecc71; /* green */
-}
-
-.card.paused {
-  background-color: #f39c12; /* orange */
-}
-
-.card.down {
-  background-color: #e74c3c; /* red */
-}
-
-/* Buttons */
-.actions {
-  margin-top: 10px;
-}
-
-.actions button {
-  margin-right: 5px;
-  padding: 5px 8px;
-  cursor: pointer;
-}
-
-.timer {
-  font-size: 18px;
+.status {
+  padding: 6px 10px;
+  border-radius: 6px;
   font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
-.card.active .timer {
-  color: #fff;
+.progress-bar {
+  height: 6px;
+  background: #334155;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.card.down .timer {
-  color: #ffcccc;
+.progress {
+  height: 100%;
+  background: #38bdf8;
+  transition: width 1s linear;
+}
+
+.alerts {
+  margin-top: 30px;
+}
+
+.alert {
+  background: #7f1d1d;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 5px;
 }
